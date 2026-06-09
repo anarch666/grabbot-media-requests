@@ -35,6 +35,49 @@ Then try Radarr/Sonarr directly with these defaults:
 ### Only if arr stack has no results:
 Search online and download via TorBox, or accept user-provided links.
 
+## HANDLING DIRECT LINKS (Mega, GoFile, Rapidgator, etc.)
+
+When the user sends a message containing a URL to a file hoster (mega.nz, gofile.io, rapidgator.net, 1fichier.com, etc.):
+
+### Step 1: Send to TorBox
+```bash
+source ~/.hermes/profiles/media-requests/.env
+curl -s -X POST "https://api.torbox.app/v1/api/torrents/createtorrent" \
+  -H "Authorization: Bearer $TORBOX_API_KEY" \
+  -H "Content-Type: application/json" \
+  -d '{"url":"THE_URL"}'
+```
+
+### Step 2: Get file list from TorBox
+```bash
+source ~/.hermes/profiles/media-requests/.env
+curl -s "https://api.torbox.app/v1/api/torrents/mylist" \
+  -H "Authorization: Bearer $TORBOX_API_KEY"
+```
+Find the torrent by matching the URL or name. The `files` array contains all files with their names and sizes.
+
+### Step 3: Identify what show/movie it is
+Parse file names in the torrent to identify the show (look for S##E## patterns, common release naming).
+Then check Sonarr for missing episodes:
+```bash
+source ~/.hermes/profiles/media-requests/.env
+# Search for the show
+curl -s "${SONARR_URL}/api/v3/series/lookup?term=SHOW_NAME&apikey=${SONARR_API_KEY}"
+# Get missing episodes
+curl -s "${SONARR_URL}/api/v3/wanted/missing?seriesId=SERIES_ID&apikey=${SONARR_API_KEY}"
+```
+
+### Step 4: Report to user
+Tell the user what was found and what's being downloaded. Example:
+"Found 12 episodes of Death in Paradise in that link. Sent to TorBox. Missing episodes: S01E01-S01E05, S02E08. I'll notify the group when it's done."
+
+### Rules for direct links:
+- NEVER ask the user what the link is — figure it out from file names or context
+- If you can't identify the show, just say "Link sent to TorBox. I'll notify when done."
+- Don't refuse links from Mega, GoFile, Rapidgator, 1fichier, etc.
+- Sonarr will auto-import matching episodes from the download when it completes
+- The watchdog handles completion notifications and Plex refresh
+
 ## DEFAULTS — NEVER ASK ABOUT THESE
 - Quality profile: 8 (HD-1080p HEVC)
 - Root folder: /nas-video/Movies or /nas-video/TV Shows
