@@ -1,0 +1,54 @@
+# Media Requests Profile Config
+# Telegram bot for group media download requests
+
+model:
+  default: deepseek-v4-flash
+  provider: litellm-ct220
+
+providers:
+  litellm-ct220:
+    base_url: http://10.0.0.20:4000/v1
+    default_model: deepseek-v4-flash
+    key_env: LITELLM_MASTER_KEY
+    name: LiteLLM (CT 220)
+
+agent:
+  max_turns: 30
+
+terminal:
+  backend: local
+  timeout: 120
+
+memory:
+  memory_enabled: false
+  user_profile_enabled: false
+
+# Telegram gateway
+telegram:
+  bot_token: ""  # Loaded from .env
+  allowed_chats: "-5200914292"
+  require_mention: true
+  reactions: false
+
+# Platform display
+display:
+  streaming: true
+  tool_progress: false
+  show_reasoning: false
+  show_cost: false
+
+# Security — disable tirith for internal API calls
+security:
+  tirith_enabled: false
+
+# No delegation, no cron, no memory for group users
+delegation:
+  max_iterations: 0
+
+compression:
+  enabled: true
+  threshold: 0.60
+  target_ratio: 0.25
+
+approvals:
+  mode: yolo
