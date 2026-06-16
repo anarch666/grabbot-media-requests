@@ -2,9 +2,10 @@
 # Telegram bot for group media download requests
 
 model:
-  default: deepseek-v4-flash
-  provider: litellm-ct220
+  default: nvidia/nemotron-3-ultra:free
+  provider: nous
 
+# LiteLLM retained as fallback/reference provider, but grabbot now uses Nous Portal free model.
 providers:
   litellm-ct220:
     base_url: http://10.0.0.20:4000/v1
@@ -32,7 +33,7 @@ telegram:
 
 # Platform display
 display:
-  streaming: true
+  streaming: false
   tool_progress: false
   show_reasoning: false
   show_cost: false
